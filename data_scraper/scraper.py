@@ -8,6 +8,7 @@ def timeout_handler(signum, frame):
 
 # load the dataset
 df = pd.read_csv("datasets/Dataset1.csv")
+print(df.head())
 
 # add a column to the dataset if there are less than 3 columns
 if len(df.columns) < 3:
@@ -21,7 +22,6 @@ number_of_failures = 0
 saving_frequency = 20
 
 # choose the first row with a blank entry in column 3 of df
-print(df.head())
 question_index = df[df.chatgpt_response.isnull()].index[0]
 
 bot = ChatGPT()
@@ -40,13 +40,16 @@ while(number_of_failures< threshold):
     print(f"Question: {question[:100]}")
 
     response = bot.ask(question)
+    if response == "Unusable response produced, maybe login session expired. Try 'pkill firefox' and 'chatgpt install'":
+      raise Exception("Unusable response produced, maybe login session expired. Try 'pkill firefox' and 'chatgpt install'")
+
     # add the response to the dataset
     df.iloc[question_index, 2] = response.strip()
 
     # check if the saving frequency has been reached
     if question_index % saving_frequency == 0:
       df.to_csv("datasets/Dataset1.csv", index=False)
-      print(f"Dataset saved till row {question_index}")
+      print(f"\nDataset saved till row {question_index}\n")
     
     print(f"Response: {response[:100]}")
 
@@ -64,4 +67,4 @@ while(number_of_failures< threshold):
 
 # save the dataset
 df.to_csv("datasets/Dataset1.csv", index=False)
-print(f"Dataset saved till row {question_index}")
+print(f"\nDataset saved till row {question_index}\n")
