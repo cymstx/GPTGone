@@ -8,7 +8,7 @@ def timeout_handler(signum, frame):
   print("request timeout")
   raise Exception("Timed out!")
 
-dataset_path = "datasets/Dataset1.csv"
+dataset_path = "../../datasets/Dataset1.csv"
 
 # load the dataset
 df = pd.read_csv(dataset_path)
