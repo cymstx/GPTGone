@@ -1,14 +1,17 @@
 from chatgpt_wrapper import ChatGPT
 import pandas as pd
 import signal
+import time
+import sys
 
 def timeout_handler(signum, frame):
   print("request timeout")
   raise Exception("Timed out!")
 
+dataset_path = "datasets/Dataset1.csv"
+
 # load the dataset
-df = pd.read_csv("datasets/Dataset1.csv")
-print(df.head())
+df = pd.read_csv(dataset_path)
 
 # add a column to the dataset if there are less than 3 columns
 if len(df.columns) < 3:
@@ -28,7 +31,7 @@ bot = ChatGPT()
 
 # register the signal function handler
 signal.signal(signal.SIGALRM, timeout_handler)
-timeout = 60
+timeout = 120
 
 while(number_of_failures< threshold):
   try:
@@ -37,10 +40,15 @@ while(number_of_failures< threshold):
 
     # select the question from the dataset
     question = df.iloc[question_index, 1]
-    print(f"Question: {question[:100]}")
+    print(f"Question {question_index}: {question[:100]}")
 
     response = bot.ask(question)
     if response == "Unusable response produced, maybe login session expired. Try 'pkill firefox' and 'chatgpt install'":
+      # wait for 45 minutes before trying again
+      print("Sleeping for 45 minutes")
+      df.to_csv(dataset_path, index=False)
+      print(f"\nDataset saved till row {question_index}\n")
+      time.sleep(40*60)
       raise Exception("Unusable response produced, maybe login session expired. Try 'pkill firefox' and 'chatgpt install'")
 
     # add the response to the dataset
@@ -48,7 +56,7 @@ while(number_of_failures< threshold):
 
     # check if the saving frequency has been reached
     if question_index % saving_frequency == 0:
-      df.to_csv("datasets/Dataset1.csv", index=False)
+      df.to_csv(dataset_path, index=False)
       print(f"\nDataset saved till row {question_index}\n")
     
     print(f"Response: {response[:100]}")
@@ -66,5 +74,5 @@ while(number_of_failures< threshold):
     bot.refresh_session()
 
 # save the dataset
-df.to_csv("datasets/Dataset1.csv", index=False)
+df.to_csv(dataset_path, index=False)
 print(f"\nDataset saved till row {question_index}\n")
