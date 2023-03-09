@@ -2,7 +2,6 @@ from chatgpt_wrapper import ChatGPT
 import pandas as pd
 import signal
 import time
-import sys
 
 def timeout_handler(signum, frame):
   print("request timeout")
@@ -43,6 +42,7 @@ while(number_of_failures< threshold):
     print(f"Question {question_index}: {question[:100]}")
 
     response = bot.ask(question)
+    
     if response == "Unusable response produced, maybe login session expired. Try 'pkill firefox' and 'chatgpt install'":
       # wait for 45 minutes before trying again
       print("Sleeping for 45 minutes")
