@@ -1,6 +1,9 @@
 import torch.nn as nn
 import torch
 
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
 class BERT(nn.Module):
     def __init__(self, bert, dropout=0.1):
         super(BERT, self).__init__()
@@ -19,8 +22,8 @@ class BERT(nn.Module):
         x = self.dropout(x)
         x = self.fc2(x)
         x = nn.functional.sigmoid(x)
-        
-        return x        
+        lst = x.tolist()
+        return flatten(lst)
     
 class HC3DatasetForBert(torch.utils.data.Dataset):
     def __init__(self, tokenizer, X):
@@ -29,7 +32,7 @@ class HC3DatasetForBert(torch.utils.data.Dataset):
         self.max_length = 512
     
     def __getitem__(self, idx):
-        x = self.data['text'][idx]
+        x = self.data['response'][idx]
         x = self.tokenizer.encode_plus(
             x,
             None,
