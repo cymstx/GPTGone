@@ -6,13 +6,12 @@ import autokeras as ak
 
 from sklearn.base import BaseEstimator, ClassifierMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
-from tensorflow.keras.models import load_model
 
 import tensorflow as tf
 import numpy as np
 import tensorflow_hub as hub
 import tensorflow_text as text
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 
 def flatten(l):
@@ -63,7 +62,8 @@ class CNNGLTRClassifier(BaseEstimator, ClassifierMixin):
 
     # Add any custom transformers as needed to produce the X input format your model needs
     def process(self, X, y=None):
-        output = [X[["GLTR Category 1", "GLTR Category 3"]], X["response"].to_numpy()]
+        output = [X[["GLTR Category 1", "GLTR Category 3"]],
+                  X["response"].to_numpy()]
         return output
 
 
