@@ -1,6 +1,7 @@
 """
-For RNN Feature Classifier
 !pip install tensorflow_text
+!pip install git+https://github.com/keras-team/keras-tuner.git
+!pip install autokeras
 """
 import autokeras as ak
 
@@ -18,6 +19,7 @@ from tensorflow.keras.models import load_model
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
+import pickle
 
 def process_output(preds):
     flattened_pred = flatten(preds)
@@ -26,8 +28,9 @@ def process_output(preds):
 
 
 class RNNPerplexityClassifier(BaseEstimator, ClassifierMixin):
-    def __init__(self, path):
-        self.model = load_model(path)
+    def __init__(self, path, path_scaler):
+        self.scaler = pickle.load(open(path_scaler, 'rb'))
+        self.model = load_model(path, custom_objects={'KerasLayer': hub.KerasLayer})
 
     def predict(self, X, y=None):
         processed_X = self.process(X)
@@ -35,7 +38,9 @@ class RNNPerplexityClassifier(BaseEstimator, ClassifierMixin):
 
     # Add any custom transformers as needed to produce the X input format your model needs
     def process(self, X, y=None):
-        output = [X[["Mean Perplexity"]].values, X["response"].values]
+        X_copy = X.copy()
+        X_copy["Mean Perplexity"] = self.scaler.transform(np.array(X_copy["Mean Perplexity"]).reshape(-1, 1))
+        output = [np.asarray(X_copy["Mean Perplexity"].values).astype('float32'), X_copy["response"].values]
         return output
 
 
