@@ -3,6 +3,7 @@ import pandas as pd
 
 from classifiers.BertBaseClassifier import BertBaseClassifier
 from classifiers.SvmTfidfBaseClassifier import SvmTfidfBaseClassifier
+from classifiers.KerasModelClassifier import CNNGLTRClassifier
 from ensemble.Ensemble import Ensemble
 
 def predict(text):
@@ -12,14 +13,15 @@ def predict(text):
     #Initialise models -- Adjust path accordingly
     bert = BertBaseClassifier("model_bertbase_updated.pt")
     svm_tfidf_classifier = SvmTfidfBaseClassifier("svm_rbf_model_no_gltr.pkl", "tfidf_vectorizer.pkl")
-
+    #Make sure you have the automodel file loaded locally as well
+    cnn = CNNGLTRClassifier("model_autokeras_gltr")
     #Initialise ensemble
     models = [bert, svm_tfidf_classifier]
-    ensemble = Ensemble(models, ["BERT","SVM"])
+    ensemble = Ensemble(models, ["BERT","CNN","SVM"])
 
     #pred is an output "AI" or "Human" and output_dict shows what prediction each model made
     threshold = 0.6
-    weights = np.array([0.41176471, 0.58823529])
+    weights = np.array([0.25, 0.25,0.5])
     pred,  output_dict = ensemble.predict(sample_df, weights, threshold)
 
     print(pred)
