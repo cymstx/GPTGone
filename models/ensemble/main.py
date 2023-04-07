@@ -4,25 +4,28 @@ import pandas as pd
 from classifiers.BertBaseClassifier import BertBaseClassifier
 from classifiers.SvmTfidfBaseClassifier import SvmTfidfBaseClassifier
 from classifiers.KerasModelClassifier import CNNGLTRClassifier
-from ensemble.Ensemble import Ensemble
+from Ensemble import Ensemble
+from sklearn.pipeline import Pipeline
+from model_development.feature_engineering.GLTRTransformer import GLTRTransformer
 
 def predict(text):
     text_lst = [text]
     sample_df = pd.DataFrame(text_lst, columns=['response'])
 
-    #Initialise models -- Adjust path accordingly
+    pipeline = Pipeline(steps=[('GLTR', GLTRTransformer())])
+    processed_input_df = pipeline.fit_transform(sample_df)
+
     bert = BertBaseClassifier("model_bertbase_updated.pt")
-    svm_tfidf_classifier = SvmTfidfBaseClassifier("svm_rbf_model_no_gltr.pkl", "tfidf_vectorizer.pkl")
-    #Make sure you have the automodel file loaded locally as well
+    svm = SvmTfidfBaseClassifier("svm_rbf_model_no_gltr.pkl", "tfidf_vectorizer.pkl")
     cnn = CNNGLTRClassifier("model_autokeras_gltr")
-    #Initialise ensemble
-    models = [bert, svm_tfidf_classifier]
+
+    models=[bert, cnn, svm]
     ensemble = Ensemble(models, ["BERT","CNN","SVM"])
 
     #pred is an output "AI" or "Human" and output_dict shows what prediction each model made
     threshold = 0.6
     weights = np.array([0.25, 0.25,0.5])
-    pred,  output_dict = ensemble.predict(sample_df, weights, threshold)
+    pred,  output_dict = ensemble.predict(processed_input_df, weights, threshold)
 
     print(pred)
     print(output_dict)
