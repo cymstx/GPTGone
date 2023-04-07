@@ -63,3 +63,18 @@ class SvmTfidfBaseClassifier(BaseEstimator, ClassifierMixin):
         X_Tfidf = self.vectorizer.transform(text_arr)
 
         return X_Tfidf
+
+
+class SvmTfidfBaseClassifierV2(BaseEstimator, ClassifierMixin):
+    def __init__(self, path_model: str, path_vectorizer: str):
+        self.model = pickle.load(open(path_model, 'rb'))
+        self.vectorizer = pickle.load(
+            open(path_vectorizer, 'rb'))
+
+    def predict(self, X, y=None):
+        processed_X = self.process(X)
+        return self.model.predict(processed_X)
+
+    def process(self, X, y=None):
+        X_processed = self.vectorizer.transform(X['response'])
+        return X_processed
