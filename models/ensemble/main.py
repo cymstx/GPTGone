@@ -19,7 +19,6 @@ def predict(text):
     svm = SvmTfidfBaseClassifier("svm_rbf_model_no_gltr.pkl", "tfidf_vectorizer.pkl")
     cnn = CNNGLTRClassifier("model_autokeras_gltr")
 
-    #models = [bert, svm_tfidf_classifier]
     models=[bert, cnn, svm]
     ensemble = Ensemble(models, ["BERT","CNN","SVM"])
 
