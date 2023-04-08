@@ -25,6 +25,26 @@ class BERT(nn.Module):
         lst = x.tolist()
         return flatten(lst)
     
+class MBERT(nn.Module):
+    def __init__(self, bert, dropout=0.1):
+        super(MBERT, self).__init__()
+        
+        self.bert = bert
+        self.dropout = nn.Dropout(dropout)
+        self.fc1 = nn.Linear(768, 512)
+        self.fc2 = nn.Linear(512, 3)
+        self.relu = nn.ReLU()
+         
+    def forward(self, ids, mask, token_type_ids):
+        _, o2= self.bert(ids,attention_mask=mask,token_type_ids=token_type_ids, return_dict=False)
+        
+        x = self.fc1(o2)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        
+        return x        
+
 class HC3DatasetForBert(torch.utils.data.Dataset):
     def __init__(self, tokenizer, X):
         self.data = X
